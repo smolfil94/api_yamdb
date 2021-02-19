@@ -1,46 +1,36 @@
-from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
+
+from .managers import CustomUserManager
 
 
-class UserRole(models.TextChoices):
-    """Роли пользователей."""
-
-    USER = "user"
-    MODERATOR = "moderator"
-    ADMIN = "admin"
 
 
-class User(AbstractUser):
-    """Расширение стандартной модели пользователя Django."""
+class CustomUser(AbstractUser):
+    class Roles(models.TextChoices):
+        ADMIN = 'admin', _('admin')
+        MODERATOR = 'moderator', _('moderator')
+        USER = 'user', _('user')
 
-    bio = models.TextField(blank=True, null=True)
-    email = models.EmailField(max_length=255, blank=False, unique=True)
-    role = models.CharField(
-        max_length=150,
-        blank=False,
-        choices=UserRole.choices,
-        default=UserRole.USER,
-    )
+    role = models.CharField(max_length=100, choices=Roles.choices, default=Roles.USER)
+    bio = models.TextField(blank=True)
+
+    confirmation_code = models.CharField(_('confirmation_code'), max_length=10, null=True, blank=True)
+
+    email = models.EmailField(_('email address'), unique=True, blank=False)
+
     username = models.CharField(
-        max_length=255, blank=True, null=True, unique=True, db_index=True
-    )
-    confirmation_code = models.CharField(
         max_length=150,
-        blank=True,
-        null=True,
+        unique=True,
     )
-    password = models.CharField(max_length=255, blank=False, null=True)
 
-    first_name = models.TextField(max_length=255, blank=True, null=True)
-    last_name = models.TextField(max_length=255, blank=True, null=True)
-
-    class Meta:
-        db_table = "users"
-
-    @property
-    def is_admin(self):
-        return self.role == "admin" or self.is_staff
+    objects = CustomUserManager()
 
     @property
     def is_moderator(self):
-        return self.role == "moderator"
+        return self.role == self.Roles.MODERATOR
+
+    @property
+    def is_admin(self):
+        return self.role == self.Roles.ADMIN
