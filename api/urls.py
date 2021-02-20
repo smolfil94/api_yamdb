@@ -9,7 +9,7 @@ from api.views.apititleviewset import APITitleViewSet
 
 router_v1 = DefaultRouter()
 
-#router_v1.register('titles', APITitleViewSet)
+router_v1.register('titles', APITitleViewSet)
 router_v1.register('genres', APIGenreViewSet)
 router_v1.register('categories', APICategoryViewSet)
 #router_v1.register('titles/(?P<title_pk>\d+)/reviews/', APIReviewViewSet)
