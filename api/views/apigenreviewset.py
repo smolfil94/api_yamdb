@@ -1,3 +1,5 @@
+from rest_framework.pagination import PageNumberPagination
+
 from .createreadanddeleteviewset import CreateReadAndDeleteModelViewSet
 from ..models import Genre
 from ..serializers.genreserializer import GenreSerializer
@@ -6,3 +8,4 @@ from ..serializers.genreserializer import GenreSerializer
 class APIGenreViewSet(CreateReadAndDeleteModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    pagination_class = PageNumberPagination
