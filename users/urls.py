@@ -1,11 +1,31 @@
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from . import views
+from .views import CodeConfirmView, EmailSignUpView, UserViewSet
 
-router_v1 = DefaultRouter()
+router = DefaultRouter()
+
+router.register(r'users', UserViewSet)
+
+auth_patterns = [
+    path(
+        'email/',
+        EmailSignUpView.as_view()
+    ),
+    path(
+        'token/',
+        CodeConfirmView.as_view(),
+        name='token_obtain_pair',
+    ),
+]
 
 urlpatterns = [
-   # path('v1/auth/email/', views.email_confirmation),
-    path('v1/auth/token/', views.get_token),
-    ]
+    path(
+        'v1/auth/',
+        include(auth_patterns),
+    ),
+    path(
+        'v1/',
+        include(router.urls),
+    ),
+]

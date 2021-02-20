@@ -24,9 +24,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'api',
-    'users'
+    'users',
+
 ]
  
 MIDDLEWARE = [
@@ -112,10 +114,6 @@ STATIC_URL = '/static/'
  
 STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
-REST_FRAMEWORK = {
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 100,
-}
 
 REST_FRAMEWORK = {
         'DEFAULT_PERMISSION_CLASSES': [
@@ -129,6 +127,13 @@ REST_FRAMEWORK = {
     }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=345),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
-}
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    }
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'nikismol94'
+EMAIL_HOST_PASSWORD = 'ddvjjzbbodxxitny'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+DEFAULT_FROM_EMAIL = 'nikismol94@gmail.com'
