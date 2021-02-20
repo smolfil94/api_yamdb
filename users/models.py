@@ -1,28 +1,38 @@
-from django.db import models
+import uuid
+
 from django.contrib.auth.models import AbstractUser
-from django.utils.translation import gettext_lazy as _
+from django.db import models
 
 
 class User(AbstractUser):
-    class Role(models.TextChoices):
-        USER = 'user', _('User')
-        MODERATOR = 'moderator', _('Moderator')
-        ADMIN = 'admin', _('Admin')
-
-    password = models.CharField(max_length=100, blank=True)
-    email = models.EmailField(unique=True, blank=False)
-    bio = models.TextField(max_length=256, blank=True)
-    username = models.CharField(max_length=50, unique=True)
-    role = models.CharField(
-        max_length=10,
-        choices=Role.choices,
-        default=Role.USER
+    bio = models.TextField(
+        max_length=500,
+        blank=True,
+    )
+    email = models.EmailField(
+        help_text='email address',
+        unique=True,
     )
 
-    @property
-    def is_admin(self):
-        return self.role == self.Role.ADMIN or self.is_superuser
+    class UserRole:
+        USER = 'user'
+        ADMIN = 'admin'
+        MODERATOR = 'moderator'
+        choices = [
+            (USER, 'user'),
+            (ADMIN, 'admin'),
+            (MODERATOR, 'moderator'),
+        ]
 
-    @property
-    def is_moderator(self):
-        return self.role == self.Role.MODERATOR
+    role = models.CharField(
+        max_length=25,
+        choices=UserRole.choices,
+        default=UserRole.USER,
+    )
+    confirmation_code = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
+    )
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
