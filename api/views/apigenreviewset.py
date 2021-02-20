@@ -12,3 +12,4 @@ class APIGenreViewSet(CreateReadAndDeleteModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
+    lookup_field = 'slug'
