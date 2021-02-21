@@ -5,15 +5,6 @@ from django.db import models
 
 
 class User(AbstractUser):
-    bio = models.TextField(
-        max_length=500,
-        blank=True,
-    )
-    email = models.EmailField(
-        help_text='email address',
-        unique=True,
-    )
-
     class UserRole:
         USER = 'user'
         ADMIN = 'admin'
@@ -24,14 +15,13 @@ class User(AbstractUser):
             (MODERATOR, 'moderator'),
         ]
 
+    password = models.CharField(max_length=50, blank=True)
+    email = models.EmailField(unique=True, blank=False)
+    bio = models.TextField(blank=True)
     role = models.CharField(
-        max_length=25,
+        max_length=10,
         choices=UserRole.choices,
-        default=UserRole.USER,
-    )
-    confirmation_code = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
+        default=UserRole.USER
     )
 
     USERNAME_FIELD = 'email'
