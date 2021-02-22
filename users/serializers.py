@@ -1,26 +1,40 @@
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from .models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        fields = '__all__'
-        model = User
-        lookup_field = 'username'
-
-
-class TokenSerializer(serializers.ModelSerializer):
+    role = serializers.ChoiceField(choices=User.Role)
+    username = serializers.CharField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+            ),
+        ],
+    )
     email = serializers.EmailField(
-        required=True
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+            ),
+        ],
     )
 
-    confirmation_code = serializers.CharField(
-        required=True
-    )
-
-
-class SignUpSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('email',)
+
+        fields = (
+            'id', 'username', 'email', 'bio', 'first_name', 'last_name', 'role'
+        )
+
+
+class EmailSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+
+
+class TokenSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    confirmation_code = serializers.CharField(required=True)

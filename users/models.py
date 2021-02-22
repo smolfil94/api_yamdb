@@ -1,29 +1,60 @@
-import uuid
-
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
 class User(AbstractUser):
-    class Role:
+    class Role(models.TextChoices):
         USER = 'user'
-        ADMIN = 'admin'
         MODERATOR = 'moderator'
+        ADMIN = 'admin'
 
-    email = models.EmailField(unique=True, blank=False)
-    bio = models.TextField(blank=True)
-    confirmation_code = models.UUIDField(
-        default=uuid.uuid4,
-        editable=False,
+    email = models.EmailField(
+        verbose_name='Почта',
+        unique=True
+    )
+    username = models.CharField(
+        verbose_name='username',
+        max_length=30,
+        unique=True,
+        null=True
+    )
+    role = models.CharField(
+        verbose_name='Роль',
+        max_length=30,
+        choices=Role.choices,
+        default=Role.USER
+    )
+    bio = models.TextField(
+        verbose_name='О себе',
+        null=True
+    )
+    first_name = models.CharField(
+        verbose_name='Имя',
+        max_length=30,
+        null=True
+    )
+    last_name = models.CharField(
+        verbose_name='Фамилия',
+        max_length=40,
+        null=True
     )
 
     @property
     def is_admin(self):
-        self.role = self.Role.ADMIN or self.is_superuser
+        return self.role == self.Role.ADMIN or self.is_superuser
 
     @property
     def is_moderator(self):
-        self.role = self.Role.MODERATOR
+        return self.is_admin or self.role == self.Role.MODERATOR
 
     def get_payload(self):
-        pass
+        return {
+            'user_id': self.id,
+            'email': self.email,
+            'username': self.username
+        }
+
+    class Meta:
+        ordering = ('username', )
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
