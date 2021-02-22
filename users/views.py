@@ -1,88 +1,97 @@
-import uuid
+import os
 
-from django.core import exceptions
-from django.core.mail import send_mail
-from rest_framework import exceptions, filters, permissions, status, viewsets
+from django.contrib.auth.models import send_mail
+from rest_framework import status, views, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import User
-from api_yamdb.settings import DEFAULT_FROM_EMAIL
-
 from .permissions import IsAdmin
-from .serializers import SignUpSerializer, TokenSerializer, UserSerializer
+from .serializers import EmailSerializer, TokenSerializer, UserSerializer
+from api_yamdb.settings import SIMPLE_JWT
 
 
 class UserViewSet(viewsets.ModelViewSet):
-    queryset = User.objects.all()
-    permission_classes = [IsAdminUser | IsAdmin]
     serializer_class = UserSerializer
-    lookup_field = 'username'
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['username', ]
+    queryset = User.objects.all()
 
-    @action(methods=['patch', 'get'], detail=False,
-            permission_classes=[IsAuthenticated],
-            url_path='me', url_name='me')
-    def me(self, request, *args, **kwargs):
-        instance = self.request.user
-        serializer = self.get_serializer(instance)
-        if self.request.method == 'PATCH':
-            serializer = self.get_serializer(
-                instance, data=request.data, partial=True)
-            serializer.is_valid(raise_exception=True)
-            serializer.save(email=instance.email, role=instance.role)
+    permission_classes = [IsAuthenticated, IsAdmin]
+    pagination_class = PageNumberPagination
+    lookup_field = 'username'
+
+    @action(
+        detail=False,
+        methods=['get', 'patch'],
+        permission_classes=[IsAuthenticated],
+    )
+    def me(self, request, **kwargs):
+        partial = kwargs.pop('partial', True)
+        serializer = self.get_serializer(
+            request.user,
+            data=request.data,
+            partial=partial,
+        )
+        serializer.is_valid()
+        self.perform_update(serializer)
+
         return Response(serializer.data)
 
 
-class EmailSignUpView(APIView):
-    permission_classes = [permissions.AllowAny]
+def send_confirmation_code(subject, message, recipient):
+    send_mail(
+        subject=subject,
+        message=message,
+        from_email=os.getenv('EMAIL_HOST_USER'),
+        recipient_list=[recipient]
+    )
+
+
+class ConfirmCodeView(views.APIView):
+    serializer_class = EmailSerializer
+
+    def action(self, user, serializer, token):
+        code = token.encode(user.get_payload())
+        send_confirmation_code(
+            subject='Hi',
+            message=f'Your code is: {code}',
+            recipient=user.email
+        )
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = SignUpSerializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data.get('email')
-            confirmation_code = uuid.uuid4()
-            User.objects.create(
-                email=email, username=str(email),
-                confirmation_code=confirmation_code, is_active=False
-            )
-            send_mail(
-                'Account verification',
-                'Your activation key {}'.format(confirmation_code),
-                DEFAULT_FROM_EMAIL,
-                [email],
-                fail_silently=True,
-            )
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid()
+        User.objects.get_or_create(email=request.data.get('email'))
+        user = get_object_or_404(User, email=request.data.get('email'))
+        token = TokenBackend(
+            SIMPLE_JWT['ALGORITHM'],
+            signing_key=SIMPLE_JWT['SIGNING_KEY'],
+        )
+
+        return self.action(user, serializer, token)
+
+
+class TokenView(ConfirmCodeView):
+
+    serializer_class = TokenSerializer
+
+    def action(self, user, serializer, token):
+        payload = token.decode(self.request.data.get('confirmation_code'))
+
+        if payload == user.get_payload():
+            refresh = RefreshToken.for_user(user)
             return Response(
-                {'result': 'A confirmation code has been sent to your email'},
-                status=200)
+                {
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                },
+                status=status.HTTP_200_OK,
+            )
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CodeConfirmView(APIView):
-    permission_classes = [permissions.AllowAny]
-
-    def post(self, *args, **kwargs):
-        serializer = TokenSerializer(data=self.request.data)
-        serializer.is_valid(raise_exception=True)
-        try:
-            user = User.objects.get(
-                email=serializer.data['email'],
-                confirmation_code=serializer.data['confirmation_code']
-            )
-        except exceptions.ValidationError:
-            return Response(
-                data={'detail': 'Invalid email or code'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        else:
-            user.is_active = True
-            user.save()
-            refresh_token = RefreshToken.for_user(user)
-            return Response({
-                'token': str(refresh_token.access_token)
-            })

@@ -3,15 +3,16 @@ from django.contrib import admin
 from .models import User
 
 
-@admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = (
-        'id',
-        'first_name',
-        'last_name',
-        'username',
-        'bio',
-        'email',
-        'role',
-    )
-    empty_value_display = '-empty-'
+    list_display = ('username', 'email', 'get_full_name', 'role')
+    list_filter = ('role',)
+    search_fields = ('first_name', 'last_name', 'username', 'email')
+    empty_value_display = '-'
+
+    def get_full_name(self, obj):
+        return obj.get_full_name()
+
+    get_full_name.short_description = 'Полное имя'
+
+
+admin.site.register(User, UserAdmin)

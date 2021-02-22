@@ -1,34 +1,20 @@
-from django.urls import include, path
+from django.conf.urls import include
+from django.urls import path
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import CodeConfirmView, EmailSignUpView, UserViewSet
+from .views import ConfirmCodeView, TokenView, UserViewSet
 
 router_v1 = DefaultRouter()
+router_v1.register('users', UserViewSet, basename='users')
 
-router_v1.register(r'users', UserViewSet, basename='users')
-
-router_v1.register(r'users', UserViewSet)
-
-auth_patterns = [
-    path(
-        'email/',
-        EmailSignUpView.as_view()
-    ),
-    path(
-        'token/',
-        CodeConfirmView.as_view(),
-        name='token_obtain_pair',
-    ),
+registration = [
+    path('email/', ConfirmCodeView.as_view(), name='sent_confirm_code'),
+    path('token/', TokenView.as_view(), name='sent_jwt_token'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='refresh_token')
 ]
 
 urlpatterns = [
-    path('', include(router_v1.urls)),
-    path(
-        'v1/auth/',
-        include(auth_patterns),
-    ),
-    path(
-        'v1/',
-        include(router_v1.urls),
-    ),
+    path('v1/', include(router_v1.urls)),
+    path('v1/auth/', include(registration)),
 ]
