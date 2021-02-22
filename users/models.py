@@ -5,24 +5,25 @@ from django.db import models
 
 
 class User(AbstractUser):
-    class UserRole:
+    class Role:
         USER = 'user'
         ADMIN = 'admin'
         MODERATOR = 'moderator'
-        choices = [
-            (USER, 'user'),
-            (ADMIN, 'admin'),
-            (MODERATOR, 'moderator'),
-        ]
 
-    password = models.CharField(max_length=50, blank=True)
     email = models.EmailField(unique=True, blank=False)
     bio = models.TextField(blank=True)
-    role = models.CharField(
-        max_length=10,
-        choices=UserRole.choices,
-        default=UserRole.USER
+    confirmation_code = models.UUIDField(
+        default=uuid.uuid4,
+        editable=False,
     )
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    @property
+    def is_admin(self):
+        self.role = self.Role.ADMIN or self.is_superuser
+
+    @property
+    def is_moderator(self):
+        self.role = self.Role.MODERATOR
+
+    def get_payload(self):
+        pass

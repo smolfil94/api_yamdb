@@ -7,6 +7,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         fields = '__all__'
         model = User
+        lookup_field = 'username'
 
 
 class TokenSerializer(serializers.ModelSerializer):
