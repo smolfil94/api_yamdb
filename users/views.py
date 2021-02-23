@@ -67,8 +67,8 @@ class ConfirmCodeView(views.APIView):
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid()
-        User.objects.get_or_create(email=request.data.get('email'))
-        user = get_object_or_404(User, email=request.data.get('email'))
+        User.objects.get_or_create(email=request.data['email'])
+        user = get_object_or_404(User, email=request.data['email'])
         token = TokenBackend(
             SIMPLE_JWT['ALGORITHM'],
             signing_key=SIMPLE_JWT['SIGNING_KEY'],
@@ -82,7 +82,7 @@ class TokenView(ConfirmCodeView):
     serializer_class = TokenSerializer
 
     def action(self, user, serializer, token):
-        payload = token.decode(self.request.data.get('confirmation_code'))
+        payload = token.decode(self.request.data['confirmation_code'])
 
         if payload == user.get_payload():
             refresh = RefreshToken.for_user(user)
