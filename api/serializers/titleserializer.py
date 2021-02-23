@@ -6,7 +6,7 @@ from ..models import Title, Category, Genre
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(required=False)
+    category = CategorySerializer()
     genre = GenreSerializer(many=True)
 
     class Meta:
@@ -20,7 +20,6 @@ class GetTitleSerializer(TitleSerializer):
 
 
 class PostTitleSerializer(TitleSerializer):
-    pass
     category = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Category.objects.all(),
