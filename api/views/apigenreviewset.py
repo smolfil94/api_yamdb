@@ -3,6 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 
 from .createreadanddeleteviewset import CreateReadAndDeleteModelViewSet
 from ..models import Genre
+from ..permissions import IsAdminOrReadOnly
 from ..serializers.genreserializer import GenreSerializer
 
 
@@ -13,3 +14,4 @@ class APIGenreViewSet(CreateReadAndDeleteModelViewSet):
     filter_backends = (SearchFilter,)
     search_fields = ('name',)
     lookup_field = 'slug'
+    permission_classes = [IsAdminOrReadOnly,]
