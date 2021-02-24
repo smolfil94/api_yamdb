@@ -1,12 +1,11 @@
 from django.shortcuts import get_object_or_404
-
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.viewsets import ModelViewSet
 
 from ..models import Comment, Review
+from ..permissions import IsModeratorOrAdminOrAuthorOrReadOnly
 from ..serializers.commentserializer import CommentSerializer
-from ..review_permission import IsModeratorOrAdminOrAuthorOrReadOnly
 
 
 class APICommentViewSet(ModelViewSet):
@@ -23,7 +22,7 @@ class APICommentViewSet(ModelViewSet):
         return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        review = get_object_or_404(Review, 
+        review = get_object_or_404(Review,
                                    pk=self.kwargs.get('review_id'))
         return review.comments.all()
 
