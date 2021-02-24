@@ -12,11 +12,12 @@ router_v1 = DefaultRouter()
 router_v1.register('titles', APITitleViewSet)
 router_v1.register('genres', APIGenreViewSet)
 router_v1.register('categories', APICategoryViewSet)
-#router_v1.register('titles/(?P<title_pk>\d+)/reviews/', APIReviewViewSet)
-#router_v1.register(
-#    'titles/(?P<title_pk>\d+)/reviews/(?P<review_pk>\d+)/comments',
-#    APICommentViewSet
-#)
+router_v1.register(r'titles/(?P<title_id>\d+)/reviews', APIReviewViewSet,
+                   basename='Review')
+router_v1.register(
+    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+    APICommentViewSet
+)
 
 urlpatterns = [
     path('v1/', include(router_v1.urls)),
