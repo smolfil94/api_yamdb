@@ -6,4 +6,4 @@ class Category(models.Model):
     slug = models.SlugField(unique=True)
 
     class Meta:
-        ordering = ['name',]
+        ordering = ['name']

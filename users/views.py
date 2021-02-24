@@ -10,16 +10,16 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api_yamdb.settings import SIMPLE_JWT
+
 from .models import User
 from .permissions import IsAdmin
 from .serializers import EmailSerializer, TokenSerializer, UserSerializer
-from api_yamdb.settings import SIMPLE_JWT
 
 
 class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     queryset = User.objects.all()
-
     permission_classes = [IsAuthenticated, IsAdmin]
     pagination_class = PageNumberPagination
     lookup_field = 'username'
@@ -61,7 +61,6 @@ class ConfirmCodeView(views.APIView):
             message=f'Your code is: {code}',
             recipient=user.email
         )
-
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
@@ -73,7 +72,6 @@ class ConfirmCodeView(views.APIView):
             SIMPLE_JWT['ALGORITHM'],
             signing_key=SIMPLE_JWT['SIGNING_KEY'],
         )
-
         return self.action(user, serializer, token)
 
 
@@ -83,7 +81,6 @@ class TokenView(ConfirmCodeView):
 
     def action(self, user, serializer, token):
         payload = token.decode(self.request.data['confirmation_code'])
-
         if payload == user.get_payload():
             refresh = RefreshToken.for_user(user)
             return Response(
@@ -93,5 +90,4 @@ class TokenView(ConfirmCodeView):
                 },
                 status=status.HTTP_200_OK,
             )
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

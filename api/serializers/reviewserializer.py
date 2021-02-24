@@ -1,16 +1,13 @@
-from rest_framework import serializers
-
 from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
+from rest_framework import serializers
 
 from ..models import Review, Title
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        slug_field='username',
-        read_only=True,
-    )
+    author = serializers.SlugRelatedField(slug_field='username',
+                                          read_only=True)
 
     def validate(self, data):
         if data['score'] is None:
@@ -19,7 +16,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             Title,
             pk=self.context['view'].kwargs.get('title_id')
         )
-        author = self.context['request']._user
+        author = self.context['request'].user
         queryset = Review.objects.filter(author=author, title=title)
         if queryset.exists() and self.context['request'].method == 'POST':
             raise serializers.ValidationError(
