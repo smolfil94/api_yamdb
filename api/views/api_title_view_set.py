@@ -7,9 +7,9 @@ from rest_framework.viewsets import ModelViewSet
 from ..filter import TitleFilter
 from ..models import Title
 from ..permissions import IsAdminOrReadOnly
-from ..serializers.titleserializer import (GetTitleSerializer,
-                                           PostTitleSerializer,
-                                           TitleSerializer)
+from ..serializers.title_serializer import (GetTitleSerializer,
+                                            PostTitleSerializer,
+                                            TitleSerializer)
 
 
 class APITitleViewSet(ModelViewSet):
