@@ -2,12 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class User(AbstractUser):
-    class Role(models.TextChoices):
-        USER = 'user'
-        MODERATOR = 'moderator'
-        ADMIN = 'admin'
+class Role(models.TextChoices):
+    USER = 'user'
+    MODERATOR = 'moderator'
+    ADMIN = 'admin'
 
+
+class User(AbstractUser):
     email = models.EmailField(
         verbose_name='Почта',
         unique=True
@@ -41,11 +42,11 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == self.Role.ADMIN or self.is_superuser
+        return self.role == Role.ADMIN or self.is_superuser or self.is_staff
 
     @property
     def is_moderator(self):
-        return self.is_admin or self.role == self.Role.MODERATOR
+        return self.role == Role.MODERATOR
 
     def get_payload(self):
         return {

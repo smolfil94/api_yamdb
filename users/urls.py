@@ -11,7 +11,6 @@ router_v1.register('users', UserViewSet, basename='users')
 registration = [
     path('email/', ConfirmCodeView.as_view(), name='sent_confirm_code'),
     path('token/', TokenView.as_view(), name='sent_jwt_token'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='refresh_token')
 ]
 
 urlpatterns = [
