@@ -13,13 +13,6 @@ class APIReviewViewSet(ModelViewSet):
     permission_classes = [IsModeratorOrAdminOrAuthorOrReadOnly]
     serializer_class = ReviewSerializer
 
-    def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsModeratorOrAdminOrAuthorOrReadOnly]
-        return [permission() for permission in permission_classes]
-
     def get_queryset(self):
         title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         return title.reviews.all()

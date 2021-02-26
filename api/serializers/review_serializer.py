@@ -10,18 +10,17 @@ class ReviewSerializer(serializers.ModelSerializer):
                                           read_only=True)
 
     def validate(self, data):
-        if data['score'] is None:
-            raise ValidationError('Пожалуйста, поставьте оценку')
-        title = get_object_or_404(
-            Title,
-            pk=self.context['view'].kwargs.get('title_id')
-        )
-        author = self.context['request'].user
-        queryset = Review.objects.filter(author=author, title=title)
-        if queryset.exists() and self.context['request'].method == 'POST':
-            raise serializers.ValidationError(
-                'Вы можете оставить только одно ревью.'
+        if self.context['request'].method == 'POST':
+            title = get_object_or_404(
+                Title,
+                pk=self.context['view'].kwargs.get('title_id')
             )
+            author = self.context['request'].user
+            queryset = Review.objects.filter(author=author, title=title)
+            if queryset.exists():
+                raise serializers.ValidationError(
+                    'Вы можете оставить только одно ревью.'
+                )
         return data
 
     class Meta:

@@ -3,7 +3,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import ModelViewSet
 
-from ..models import Comment, Review
+from ..models import Comment, Review, Title
 from ..permissions import IsModeratorOrAdminOrAuthorOrReadOnly
 from ..serializers.comment_serializer import CommentSerializer
 
@@ -14,19 +14,13 @@ class APICommentViewSet(ModelViewSet):
     pagination_class = PageNumberPagination
     permission_classes = [IsModeratorOrAdminOrAuthorOrReadOnly]
 
-    def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsModeratorOrAdminOrAuthorOrReadOnly]
-        return [permission() for permission in permission_classes]
-
     def get_queryset(self):
         review = get_object_or_404(Review,
                                    pk=self.kwargs.get('review_id'))
         return review.comments.all()
 
     def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         review = get_object_or_404(Review,
                                    pk=self.kwargs.get('review_id'))
         serializer.save(author=self.request.user, review=review)
