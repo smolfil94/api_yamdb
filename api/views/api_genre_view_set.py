@@ -3,11 +3,11 @@ from rest_framework.pagination import PageNumberPagination
 
 from ..models import Genre
 from ..permissions import IsAdminOrReadOnly
-from ..serializers.genreserializer import GenreSerializer
-from .createreadanddeleteviewset import CreateReadAndDeleteModelViewSet
+from ..serializers.genre_serializer import GenreSerializer
+from .crd_view_set import CRDModelViewSet
 
 
-class APIGenreViewSet(CreateReadAndDeleteModelViewSet):
+class APIGenreViewSet(CRDModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     pagination_class = PageNumberPagination

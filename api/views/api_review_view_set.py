@@ -5,7 +5,7 @@ from rest_framework.viewsets import ModelViewSet
 
 from ..models.title import Title
 from ..permissions import IsModeratorOrAdminOrAuthorOrReadOnly
-from ..serializers.reviewserializer import ReviewSerializer
+from ..serializers.review_serializer import ReviewSerializer
 
 
 class APIReviewViewSet(ModelViewSet):

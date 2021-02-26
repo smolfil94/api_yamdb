@@ -3,8 +3,8 @@ from datetime import datetime
 from rest_framework import serializers
 
 from ..models import Category, Genre, Title
-from .categoryserializer import CategorySerializer
-from .genreserializer import GenreSerializer
+from .category_serializer import CategorySerializer
+from .genre_serializer import GenreSerializer
 
 
 class TitleSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class TitleSerializer(serializers.ModelSerializer):
 class GetTitleSerializer(TitleSerializer):
     genre = GenreSerializer(many=True)
     category = CategorySerializer()
-    rating = serializers.IntegerField(max_value=10, min_value=0)
+    rating = serializers.IntegerField()
 
 
 class PostTitleSerializer(TitleSerializer):
@@ -29,5 +29,4 @@ class PostTitleSerializer(TitleSerializer):
     genre = serializers.SlugRelatedField(slug_field='slug',
                                          queryset=Genre.objects.all(),
                                          many=True)
-    year = serializers.IntegerField(required=False,
-                                    max_value=datetime.now().year)
+    year = serializers.IntegerField(required=False)
