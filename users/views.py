@@ -10,8 +10,7 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api_yamdb.settings import SIMPLE_JWT
-
+from api_yamdb.settings import SIMPLE_JWT, EMAIL_HOST_USER
 from .models import User
 from .permissions import IsAdmin
 from .serializers import EmailSerializer, TokenSerializer, UserSerializer
@@ -30,23 +29,25 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def me(self, request, **kwargs):
-        partial = kwargs.pop('partial', True)
-        serializer = self.get_serializer(
-            request.user,
-            data=request.data,
-            partial=partial,
-        )
-        serializer.is_valid()
-        self.perform_update(serializer)
+        if request.method == 'PATCH':
+            serializer = self.get_serializer(
+                request.user,
+                data=request.data,
+                partial=True,
+            )
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
-        return Response(serializer.data)
+        serializer = self.get_serializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 def send_confirmation_code(subject, message, recipient):
     send_mail(
         subject=subject,
         message=message,
-        from_email=os.getenv('EMAIL_HOST_USER'),
+        from_email=EMAIL_HOST_USER,
         recipient_list=[recipient]
     )
 
@@ -65,9 +66,11 @@ class ConfirmCodeView(views.APIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid()
-        User.objects.get_or_create(email=request.data['email'])
-        user = get_object_or_404(User, email=request.data['email'])
+        serializer.is_valid(raise_exception=True)
+        user, created = User.objects.get_or_create(
+            email=serializer.validated_data['email'],
+            username=serializer.validated_data['username']
+        )
         token = TokenBackend(
             SIMPLE_JWT['ALGORITHM'],
             signing_key=SIMPLE_JWT['SIGNING_KEY'],
