@@ -9,12 +9,10 @@ User = get_user_model()
 
 class Review(models.Model):
     text = models.TextField()
-    score = models.PositiveIntegerField(validators=[
-                                            MinValueValidator(1),
-                                            MaxValueValidator(10)
-                                        ],
-                                        verbose_name='Оценка'
-                                        )
+    score = models.PositiveIntegerField(
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(10)
+                    ], verbose_name='Оценка')
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               related_name='reviews',
