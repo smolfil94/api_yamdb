@@ -1,16 +1,14 @@
-import os
-
 from django.contrib.auth.models import send_mail
 from rest_framework import status, views, viewsets
 from rest_framework.decorators import action
-from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.backends import TokenBackend
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from api_yamdb.settings import SIMPLE_JWT, EMAIL_HOST_USER
+from api_yamdb.settings import EMAIL_HOST_USER, SIMPLE_JWT
+
 from .models import User
 from .permissions import IsAdmin
 from .serializers import EmailSerializer, TokenSerializer, UserSerializer
@@ -40,6 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(role=request.user.role, partial=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 def send_confirmation_code(subject, message, recipient):
     send_mail(
