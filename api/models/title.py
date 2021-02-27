@@ -10,13 +10,13 @@ from .genre import Genre
 class Title(models.Model):
     name = models.CharField(max_length=300,
                             verbose_name='name')
-    year = models.IntegerField(null=True,
-                               blank=True,
-                               verbose_name='year',
-                               validators=[MaxValueValidator(
-                                   datetime.now().year,
-                                   message='Is your title from the future?'
-                               )])
+    year = models.PositiveSmallIntegerField(null=True,
+                                            blank=True,
+                                            verbose_name='year',
+                                            validators=[MaxValueValidator(
+                                                datetime.now().year,
+                                                message='Title from the future'
+                                            )])
     description = models.CharField(max_length=1000,
                                    blank=True,
                                    verbose_name='description')
