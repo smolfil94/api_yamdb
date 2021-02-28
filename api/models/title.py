@@ -10,15 +10,12 @@ from .genre import Genre
 class Title(models.Model):
     name = models.CharField(max_length=300,
                             verbose_name='name')
-    year = models.PositiveSmallIntegerField(null=True,
-                                            blank=True,
-                                            verbose_name='year',
+    year = models.PositiveSmallIntegerField(verbose_name='year',
                                             validators=[MaxValueValidator(
                                                 datetime.now().year,
                                                 message='Title from the future'
                                             )])
     description = models.CharField(max_length=1000,
-                                   blank=True,
                                    verbose_name='description')
     genre = models.ManyToManyField(Genre,
                                    related_name='titles',
