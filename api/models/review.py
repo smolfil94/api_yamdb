@@ -9,10 +9,10 @@ User = get_user_model()
 
 class Review(models.Model):
     text = models.TextField()
-    score = models.PositiveIntegerField(
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)
-                    ], verbose_name='Оценка')
+    score = models.PositiveIntegerField( 
+        validators=[MinValueValidator(1), MaxValueValidator(10)], 
+        verbose_name='Оценка',
+    )
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
                               related_name='reviews',
@@ -23,7 +23,8 @@ class Review(models.Model):
                                related_name='reviews',
                                verbose_name='Автор')
     pub_date = models.DateTimeField(auto_now_add=True,
-                                    verbose_name='Дата публикации')
+                                    verbose_name='Дата публикации',
+                                    db_index=True)
 
     class Meta:
         ordering = ['-pub_date']
