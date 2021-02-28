@@ -1,6 +1,7 @@
 from django.contrib.auth.models import send_mail
-from rest_framework import status, views, viewsets
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -49,7 +50,7 @@ def send_confirmation_code(subject, message, recipient):
     )
 
 
-class ConfirmCodeView(views.APIView):
+class ConfirmCodeView(GenericAPIView):
     serializer_class = EmailSerializer
 
     def action(self, user, serializer, token):
@@ -62,11 +63,11 @@ class ConfirmCodeView(views.APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.get_serializer(request.data)
         serializer.is_valid(raise_exception=True)
         user, created = User.objects.get_or_create(
-            email=serializer.validated_data['email'],
-            username=serializer.validated_data['username']
+            email=serializer.data['email'],
+            username=serializer.data['username']
         )
         token = TokenBackend(
             SIMPLE_JWT['ALGORITHM'],
