@@ -2,15 +2,14 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from users.models import User
 from .title import Title
-
-User = get_user_model()
 
 
 class Review(models.Model):
     text = models.TextField()
-    score = models.PositiveIntegerField( 
-        validators=[MinValueValidator(1), MaxValueValidator(10)], 
+    score = models.PositiveIntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(10)],
         verbose_name='Оценка',
     )
     title = models.ForeignKey(Title,
