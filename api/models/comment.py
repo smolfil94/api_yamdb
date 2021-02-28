@@ -1,9 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.db import models
 
-from .review import Review
+from users.models import User
 
-User = get_user_model()
+from .review import Review
 
 
 class Comment(models.Model):
