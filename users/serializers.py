@@ -13,8 +13,10 @@ class UserSerializer(serializers.ModelSerializer):
 
 class EmailSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=True)
 
 
 class TokenSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     confirmation_code = serializers.CharField(required=True)
+    username = serializers.CharField(required=True)
